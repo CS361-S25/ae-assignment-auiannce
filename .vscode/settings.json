@@ -1,0 +1,6 @@
+{
+    "cmake.sourceDirectory": "/Users/aviannceeuwing/ae-assignment-auiannce/Empirical/third-party/Catch",
+    "files.associations": {
+        "vector": "cpp"
+    }
+}
