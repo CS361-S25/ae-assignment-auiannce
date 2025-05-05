@@ -1,28 +1,42 @@
-/* Defines the Shark class, a type of organism that hunts fish and loses energy over time.*/
+#ifndef SHARK_H
+#define SHARK_H
 
-#ifndef SHARK_H // Header guard
-#define SHARK_H //
+#include "Organism.h"
 
-#include "Organism.h" // Include base class
-#include "World.h" // Forward declare world
-#include "emp/math/math.hpp" // For math operations
+class World;
 
-/* Class representing a shark organism */
+/* The Shark class represents a predator in the ecosystem.
+   It inherits from Organism and overrides necessary functions. */
 class Shark : public Organism {
 public:
-/** Constructor: create a shark at a given position */
-  Shark(int initial_x, int initial_y) : Organism(initial_x, initial_y) {}
+  /* Constructor initializes shark's position */
+  Shark(int x, int y) : Organism(x, y) {}
 
-  /** Draw the shark as a green square on the canvas */
-  void Draw(emp::web::Canvas& canvas, double cell_size) const override {
-    canvas.Rect(x_position * cell_size, y_position * cell_size, cell_size, cell_size, " green", " green"); 
+  /* Indicates this organism is not a fish */
+  bool IsFish() const override { return false; }
+
+  /* Create a new Shark at a specified position */
+  std::shared_ptr<Organism> CloneAt(int newX, int newY) const override {
+    return std::make_shared<Shark>(newX, newY);
   }
 
-  /** Identify this organism as not a fish */
-  bool IsFish() const override { return false; } 
+  /* Reproduce if energy is sufficient by spawning a new Shark nearby */
+  void Reproduce(World& world) override {
+    if (energy >= 25.0) { // reproduction threshold
+      SpawnNear(world, *this); // try to spawn in adjacent empty cell
+      energy -= 25.0; // reproduction cost
+    }
+  }
+
+  /* Return the color representation for display purposes */
+  std::string GetColor() const override {
+    return "green"; // sharks are displayed as green
+  }
 };
 
-#endif 
+#endif
+
+
 
 
 

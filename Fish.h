@@ -1,29 +1,48 @@
-/*Defines the Fish class, a type of organism that moves randomly and reproduces occasionally.*/
+#ifndef FISH_H
+#define FISH_H
 
-#ifndef FISH_H 
-#define FISH_H 
+#include "Organism.h"
 
-#include "Organism.h" // Include base class
-#include "World.h" // Forward declare world (not used directly)
-#include "emp/math/math.hpp" // For math operations
+class World;
 
-/* Class representing a fish organism */
+/* The Fish class represents a prey organism in the ecosystem.
+   It inherits from Organism and defines behavior like reproduction and identification. */
 class Fish : public Organism {
 public:
-/** Constructor: create a fish at a given position */
-  Fish(int initial_x_position, int initial_y_position)
-    : Organism(initial_x_position, initial_y_position) {}
+  /* Constructor initializes fish's position */
+  Fish(int x, int y) : Organism(x, y) {}
 
-  /** Draw the fish as a blue square on the canvas */
-  void Draw(emp::web::Canvas& canvas, double cell_size) const override {
-    canvas.Rect(x_position * cell_size, y_position * cell_size, cell_size, cell_size, "blue", "blue"); 
+  /* Indicates this organism is a fish */
+  bool IsFish() const override { return true; }
+
+  /* Create a new Fish at a specified position */
+  std::shared_ptr<Organism> CloneAt(int newX, int newY) const override {
+    return std::make_shared<Fish>(newX, newY);
   }
 
-  /** Identify this organism as a fish */
-  bool IsFish() const override { return true; } 
+  /* Reproduce if energy is sufficient by spawning a new Fish nearby */
+  void Reproduce(World& world) override {
+    if (energy >= 5.0) { // reproduction threshold
+      SpawnNear(world, *this); // attempt to spawn in a neighboring cell
+      energy -= 4.0; // energy cost of reproduction
+    }
+  }
+
+  /* Return the color representation for display purposes */
+  std::string GetColor() const override {
+    return "blue"; // fish are displayed as blue
+  }
 };
 
-#endif 
+#endif
+
+
+
+
+
+
+
+
 
 
 

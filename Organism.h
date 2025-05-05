@@ -1,56 +1,75 @@
-/* Defines the abstract Organism class that serves as a base for Fish and Shark types.*/
+#ifndef ORGANISM_H
+#define ORGANISM_H
 
-#ifndef ORGANISM_H // Header guard start
-#define ORGANISM_H //
+#include <string>
+#include <memory>
 
-#include "emp/web/Canvas.hpp" // Include for Canvas drawing
-namespace emp { class Random; } // Forward declaration of Random
+class World; // Forward declaration to avoid circular dependency
 
-class World; // Forward declare World
-
-/* Abstract class representing any organism (fish or shark) in the world */
+/* Organism is a base class for entities in the world
+   such as Fish and Shark. It provides shared behavior and defines
+   a common interface for derived types. */
 class Organism {
 protected:
-  int x_position; // X position on grid
-  int y_position; // Y position on grid
-  double energy = 5.0; // Initial energy
+  int x;           // X position on the grid
+  int y;           // Y position on the grid
+  double energy = 5.0; // Initial energy level
 
 public:
-/** Constructor: create an organism at a given position */
-  Organism(int initial_x_position, int initial_y_position)
-    : x_position(initial_x_position), y_position(initial_y_position) {}
+  /* Constructor to initialize organism's position */
+  Organism(int startX, int startY)
+    : x(startX), y(startY) {}
 
-  virtual ~Organism() {} // Virtual destructor
+  /* Virtual destructor for base class */
+  virtual ~Organism() {}
 
-/** Get the X position */
-  int GetXPosition() const { return x_position; } 
+  /* Get X-coordinate of the organism */
+  int GetX() const { return x; }
 
-/** Get the Y position */
-  int GetYPosition() const { return y_position; } 
+  /* Get Y-coordinate of the organism */
+  int GetY() const { return y; }
 
-/** Get the current energy level */
-  double GetEnergyLevel() const { return energy; } 
+  /* Get organism's current energy */
+  double GetEnergy() const { return energy; }
 
-/** Set a new energy level */
-  void SetEnergyLevel(double new_energy) { energy = new_energy; }
+  /* Set organism's energy directly */
+  void SetEnergy(double newEnergy) { energy = newEnergy; }
 
-/** Change the energy level by a given amount */
-  void ChangeEnergy(double delta) { energy += delta; } 
+  /* Modify organism's energy by a given amount */
+  void ChangeEnergy(double amount) { energy += amount; }
 
-/** Set a new (X, Y) position */
-  void SetPosition(int new_x_position, int new_y_position) {
-    x_position = new_x_position; 
-    y_position = new_y_position; 
+  /* Update organism's position */
+  void SetPosition(int newX, int newY) {
+    x = newX;
+    y = newY;
   }
 
-/** Draw the organism on the canvas (pure virtual) */
-  virtual void Draw(emp::web::Canvas& canvas, double cell_size) const = 0; 
-
-/** Check if organism is a fish (pure virtual) */
+  /* Return true if organism is a Fish (must be implemented in derived class) */
   virtual bool IsFish() const = 0;
+
+  /* Clone the organism at a new position */
+  virtual std::shared_ptr<Organism> CloneAt(int newX, int newY) const = 0;
+
+  /* Reproduce based on internal conditions */
+  virtual void Reproduce(World& world) = 0;
+
+  /* Return organism's color for rendering */
+  virtual std::string GetColor() const = 0;
+
+protected:
+  /* Spawn a clone of the organism in a nearby empty cell */
+  void SpawnNear(World& world, const Organism& parent);
 };
 
 #endif
+
+
+
+
+
+
+
+
 
 
 

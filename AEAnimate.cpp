@@ -1,57 +1,79 @@
-/*Creates the Animate application for simulating and visualizing the ecosystem in a web browser.*/
+#include "emp/web/Animate.hpp"
+#include "emp/web/web.hpp"
+#include "emp/web/Canvas.hpp"
+#include "emp/math/Random.hpp"
+#include "World.h"
 
-#include "emp/web/Animate.hpp" // For Animate class
-#include "emp/web/web.hpp" // For DOM control
-#include "emp/web/Canvas.hpp" // For rendering
-#include "emp/math/Random.hpp" // For RNG
-#include "World.h" // Simulation world
+// Global random number generator
+emp::Random global_random(1);
 
-emp::Random global_random(1); // Global random seed
+// HTML document interface
+emp::web::Document doc("target");
 
-emp::web::Document web_document("target"); // HTML document anchor
-
-/* Main application class for the ecosystem animation */
-class AEAnimateApplication : public emp::web::Animate {
-  World world; // World being simulated
-  const double cell_size = 8.0; // Pixel size of each cell
-  emp::web::Canvas canvas; // Canvas to draw grid
+/* Simulation class handles rendering and simulation updates each frame */
+class Simulation : public emp::web::Animate {
+  World world; // The simulated ecosystem world
+  const double size = 8.0; // Size of each grid cell in pixels
+  emp::web::Canvas canvas; // Canvas for drawing organisms
 
 public:
-/** Constructor: sets up world, canvas, buttons, and initial organisms */
-  AEAnimateApplication()
-    : world(120, 100),
-      canvas(world.GetGridWidth() * cell_size, world.GetGridHeight() * cell_size, "canvas") {
+  /* Constructor sets up the simulation environment and UI */
+  Simulation()
+  : world(120, 100), // Initialize a 120x100 world
+    canvas(world.GetGridWidth() * size, world.GetGridHeight() * size, "canvas") {
 
-    // Add title and description
-    web_document << "<h2 style='color: black;'>Artificial Ecosystem Simulation</h2>";
-    web_document << "<p style='color: black;'>"
-                << "This simulation models two species: blue fish and red sharks.<br>"
-                << "Fish move randomly and reproduce occasionally.<br>"
-                << "Sharks hunt nearby fish and lose energy over time. If they run out of energy, they die.<br>"
-                << "The simulation uses toroidal wrapping (edges wrap around).<br>"
-                << "Click Start to begin, or Step to move one frame forward."
-                << "</p>";
+    // Add descriptive title and text to the webpage
+    doc << "<h2 style='color: black;'>Artificial Ecosystem Simulation</h2>";
+    doc << "<p style='color: black;'>"
+        << "This simulation shows an ecosystem with two species: blue fish and green sharks.<br>"
+        << "Fish move randomly and reproduce when they have enough energy.<br>"
+        << "Sharks lose energy over time, hunt nearby fish to survive, and reproduce when their energy is high.<br>"
+        << "Both species die if their energy reaches zero.<br>"
+        << "The world wraps around at the edges (toroidal space).<br>"
+        << "Click Start to run the simulation continuously, or Step to advance one frame at a time."
+        << "</p>";
 
-    web_document << canvas; // Add canvas
-    web_document << GetToggleButton("Start"); // Add Start button
-    web_document << GetStepButton("Step"); // Add Step button
+    // Add the canvas and control buttons to the UI
+    doc << canvas;
+    doc << GetToggleButton("Start");
+    doc << GetStepButton("Step");
 
-    world.PopulateWithInitialOrganisms(); // Populate grid with organisms
+    // Seed the world with initial organisms
+    world.PopulateInitial();
   }
 
-  /** One simulation frame update */
+  /* Called every frame to update simulation and redraw canvas */
   void DoFrame() override {
-    world.UpdateOrganisms(); // Update world state
-    world.DrawWorld(canvas); // Draw updated world
+    world.UpdateOrganisms(); // Update all fish and sharks
+    canvas.Clear("black");   // Clear canvas for redrawing
+
+    auto& grid = world.GetInternalGrid(); // Access internal grid
+
+    // Draw each organism in the grid
+    for (int x = 0; x < world.GetGridWidth(); ++x) {
+      for (int y = 0; y < world.GetGridHeight(); ++y) {
+        if (grid[x][y]) {
+          canvas.Rect(x * size, y * size, size, size,
+                      grid[x][y]->GetColor(), grid[x][y]->GetColor()); // Fill rectangle with organism's color
+        }
+      }
+    }
   }
 };
 
-AEAnimateApplication animate_application; // Create application
+// Instantiate and run the simulation
+Simulation app;
 
+/* Entry point */
 int main() {
-  animate_application.Step(); // Run one step immediately
+  app.Step(); // Draw the first frame
   return 0;
 }
+
+
+
+
+
 
 
 
