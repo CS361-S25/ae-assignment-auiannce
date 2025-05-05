@@ -1,31 +1,23 @@
-
 /*Creates the Animate application for simulating and visualizing the ecosystem in a web browser.*/
 
-#include "emp/web/Animate.hpp"
-#include "emp/web/web.hpp"
-#include "emp/web/Canvas.hpp"
-#include "emp/math/Random.hpp"
-#include "World.h"
+#include "emp/web/Animate.hpp" // For Animate class
+#include "emp/web/web.hpp" // For DOM control
+#include "emp/web/Canvas.hpp" // For rendering
+#include "emp/math/Random.hpp" // For RNG
+#include "World.h" // Simulation world
 
-// Global random number generator
-emp::Random global_random(1);
+emp::Random global_random(1); // Global random seed
 
-// Set up a document connected to the web page
-emp::web::Document web_document("target");
+emp::web::Document web_document("target"); // HTML document anchor
 
 /* Main application class for the ecosystem animation */
 class AEAnimateApplication : public emp::web::Animate {
-  /* The world grid being simulated */
-  World world;
-
-  /* Size of each grid cell when drawing */
-  const double cell_size = 8.0;
-
-  /* Canvas for drawing the world */
-  emp::web::Canvas canvas;
+  World world; // World being simulated
+  const double cell_size = 8.0; // Pixel size of each cell
+  emp::web::Canvas canvas; // Canvas to draw grid
 
 public:
-  /* Constructor: sets up world, canvas, buttons, and initial organisms */
+/** Constructor: sets up world, canvas, buttons, and initial organisms */
   AEAnimateApplication()
     : world(120, 100),
       canvas(world.GetGridWidth() * cell_size, world.GetGridHeight() * cell_size, "canvas") {
@@ -40,28 +32,32 @@ public:
                 << "Click Start to begin, or Step to move one frame forward."
                 << "</p>";
 
-    web_document << canvas; // Add canvas to document
+    web_document << canvas; // Add canvas
     web_document << GetToggleButton("Start"); // Add Start button
     web_document << GetStepButton("Step"); // Add Step button
 
-    world.PopulateWithInitialOrganisms(); // Populate initial organisms
+    world.PopulateWithInitialOrganisms(); // Populate grid with organisms
   }
 
-  /* One simulation frame update */
+  /** One simulation frame update */
   void DoFrame() override {
-    world.UpdateOrganisms(); // Update all organisms
+    world.UpdateOrganisms(); // Update world state
     world.DrawWorld(canvas); // Draw updated world
   }
 };
 
-/* Create the application */
-AEAnimateApplication animate_application;
+AEAnimateApplication animate_application; // Create application
 
-/* Start simulation immediately with one frame */
 int main() {
-  animate_application.Step(); // Do initial step
+  animate_application.Step(); // Run one step immediately
   return 0;
 }
+
+
+
+
+
+
 
 
 
